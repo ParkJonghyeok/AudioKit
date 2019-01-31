@@ -87,10 +87,17 @@ open class AKMicrophone: AKNode, AKToggleable {
         #if os(iOS) && !targetEnvironment(simulator)
         let currentFormat = AudioKit.engine.inputNode.inputFormat(forBus: 0)
         let desiredFS = AudioKit.deviceSampleRate
-        return AVAudioFormat(commonFormat: currentFormat.commonFormat,
-                             sampleRate: desiredFS,
-                             interleaved: currentFormat.isInterleaved,
-                             channelLayout: currentFormat.channelLayout!)
+        if let layout = currentFormat.channelLayout {
+            return AVAudioFormat(commonFormat: currentFormat.commonFormat,
+                                 sampleRate: desiredFS,
+                                 interleaved: currentFormat.isInterleaved,
+                                 channelLayout: layout)
+        } else {
+            return AVAudioFormat(commonFormat: currentFormat.commonFormat,
+                                 sampleRate: desiredFS,
+                                 channels: 2,
+                                 interleaved: currentFormat.isInterleaved)
+        }
         #else
         let desiredFS = AKSettings.sampleRate
         return AVAudioFormat(standardFormatWithSampleRate: desiredFS, channels: 2)
